@@ -1,0 +1,12 @@
+name: claude-chat-look
+version: "1.10.0"
+description: >-
+  A Claude-inspired look for Hermes Desktop, with refined chat, sidebar and
+  browser styling, native theme support, and optional clean transcript and
+  composer settings. Keeps Hermes' native controls and behavior.
+author: MrSakal
+kind: standalone
+provides_tools: []
+provides_hooks: []
+provides_middleware: []
+requires_env: []
