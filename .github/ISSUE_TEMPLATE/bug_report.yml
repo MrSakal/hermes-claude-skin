@@ -1,0 +1,40 @@
+name: Bug report
+description: Something in Claude Skin looks or works wrong
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Check that the bug goes away with the skin turned off. Keep chats, keys and personal details out of screenshots and logs.
+  - type: input
+    id: hermes-version
+    attributes:
+      label: Hermes Desktop version
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What you expected, and what happened instead
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or logs
