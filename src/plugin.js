@@ -2,7 +2,7 @@ import { host, PALETTE_AREA, THEMES_AREA } from '@hermes/plugin-sdk'
 
 const ID = 'claude-chat-look'
 const STYLE_ID = `${ID}-styles`
-const BUILD_ID = 'v1.0.0-beta.1'
+const BUILD_ID = 'v1.0.0-beta.2'
 const COMPOSER_WIDTH_STORAGE_KEY = 'composer-width'
 // The composer widths, in the order the palette steps through them (the last
 // one wraps round to the first).
@@ -1887,7 +1887,18 @@ html[data-claude-chat-look='true'][data-hermes-theme] {
     > div:not(:has(> [data-tree-group='grp-sessions'], > [data-tree-group='grp-main'], > [data-tree-split] > div > :is([data-tree-group='grp-sessions'], [data-tree-group='grp-main']))) {
       background: var(--cs-canvas) !important;
     }
-    > div:has(> [data-tree-group][data-window-top]:not([data-tree-group='grp-sessions']):not([data-tree-group='grp-main']):not([data-claude-has~="tree-tab-workspace"])) {
+    /* The band above a top card moves the window. Only the band, and only up
+     to where the right titlebar controls begin (--cs-right-controls-start,
+     measured by installTitlebarAlignment): Chromium sums drag and no-drag
+     areas in document order, and the controls come before the panes, so a
+     drag area laid over them wins and they stop taking clicks. */
+    > div:has(> [data-tree-group][data-window-top]:not([data-tree-group='grp-sessions']):not([data-tree-group='grp-main']):not([data-claude-has~="tree-tab-workspace"]))::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      right: max(0px, calc(100vw - var(--cs-right-controls-start, 100vw)));
+      height: var(--cs-card-top);
+      pointer-events: none;
       -webkit-app-region: drag;
     }
     > div > [role='separator'] {
@@ -10808,6 +10819,13 @@ function installTitlebarAlignment() {
       const scale = box.height / cluster.offsetHeight, before = Number.parseFloat(cluster.style.getPropertyValue('--cs-titlebar-offset')) || 0
       return [cluster, Math.round((before + (band.top + band.height / 2 - box.top - box.height / 2) / scale) * 100) / 100, before]
     })
+    // Where the right controls begin: the panes' drag band stops there.
+    const right = clusters.find(cluster => cluster.dataset.titlebarCluster === 'right')?.getBoundingClientRect()
+    const start = right?.width > 0 ? `${Math.floor(right.left)}px` : null
+    if (document.documentElement.style.getPropertyValue('--cs-right-controls-start') !== (start ?? '')) {
+      if (start) document.documentElement.style.setProperty('--cs-right-controls-start', start)
+      else document.documentElement.style.removeProperty('--cs-right-controls-start')
+    }
     for (const [cluster, offset, before] of shifts) {
       if (offset === null || Math.abs(offset) < 0.02) unshift(cluster)
       else if (Math.abs(offset - before) > 0.02 || !shifted.has(cluster)) {
@@ -10834,6 +10852,7 @@ function installTitlebarAlignment() {
     sizes.disconnect(); changes.disconnect()
     window.removeEventListener('resize', soon)
     shifted.forEach(unshift)
+    document.documentElement.style.removeProperty('--cs-right-controls-start')
   }
 }
 
@@ -14986,8 +15005,20 @@ function installClaudePaneTools({ runAction, listActions, paneVisibility, reveal
   const applySizes = () => {
     // Every measure before any write: a write between two reads lays the page out again.
     const card = cardWidth(), tree = clamp(sizes.tree || TREE_DEFAULT, TREE_MIN, card - TREE_MIN)
-    const side = sizes.side ? clamp(sizes.side, SIDE_MIN, sideMax()) : 0
-    const preview = sizes.preview ? clamp(sizes.preview, SIDE_MIN, previewMax()) : 0
+    const now = layout(), detached = root.hasAttribute('data-claude-file-joined') || root.hasAttribute('data-claude-file-over')
+    let side, preview
+    if (!detached && sizes.side && sizes.preview && shown(now.column) && now.preview) {
+      // Both columns are ours (the browser beside Files): the room is shared
+      // from the widths asked for. Bounding each by the other's width as it
+      // stands see-saws: each takes what the other left a frame ago, and the
+      // two swap sizes (and Files its view) every frame.
+      const room = columnMax(null)
+      side = clamp(sizes.side, SIDE_MIN, room - SIDE_MIN)
+      preview = clamp(sizes.preview, SIDE_MIN, room - side)
+    } else {
+      side = sizes.side ? clamp(sizes.side, SIDE_MIN, sideMax()) : 0
+      preview = sizes.preview ? clamp(sizes.preview, SIDE_MIN, previewMax()) : 0
+    }
     setVar('--cs-rail-width', sizes.sidebar ? sizes.sidebar + 'px' : '')
     setVar('--cs-files-card', card + 'px')
     setVar('--cs-files-tree', tree + 'px')

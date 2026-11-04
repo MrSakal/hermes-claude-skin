@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+## [1.0.0-beta.2] - 2026-11-04
+
+Fixes.
+
+- With the browser or Files open, the titlebar buttons on the right can be clicked again; the window still moves from the band above the pane.
+- The browser and Files side by side no longer pull each other's width back and forth, which made the panes jump and slowed the whole window.
+- Released under the MIT license.
+
 ## [1.0.0-beta.1] - 2026-11-03
 
 First beta.

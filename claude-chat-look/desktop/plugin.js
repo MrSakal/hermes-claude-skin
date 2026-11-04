@@ -1,7 +1,7 @@
 import{host,PALETTE_AREA,THEMES_AREA}from '@hermes/plugin-sdk'
 const ID='claude-chat-look'
 const STYLE_ID=`${ID}-styles`
-const BUILD_ID='v1.0.0-beta.1'
+const BUILD_ID='v1.0.0-beta.2'
 const COMPOSER_WIDTH_STORAGE_KEY='composer-width'
 const COMPOSER_WIDTH_STEPS=[['claude','Claude'],['claude-wide','Claude +20 %'],['claude-wider','Claude +40 %'],['hermes','Hermes']]
 const COMPOSER_WIDTH_MODES=Object.fromEntries(COMPOSER_WIDTH_STEPS.map(([mode,label],step)=>
@@ -363,7 +363,7 @@ ${$T}{[data-tree-split]{> div > [data-tree-group='grp-terminal']:not([data-pane-
 > div > [data-tree-group]:not([data-tree-group='grp-sessions']):not([data-tree-group='grp-main']):not([data-claude-has~="tree-tab-workspace"])[data-window-top] > [data-panel-header] > :is([data-zone-tabstrip],[data-panel-page-header]){position:relative!important;inset:auto!important;}
 > div > [data-tree-group]:not([data-tree-group='grp-sessions']):not([data-tree-group='grp-main']):not([data-claude-has~="tree-tab-workspace"])[data-window-top] > [data-panel-header]:not(:has([data-zone-tabstrip],[data-panel-page-header])){display:none!important;}
 > div:not(:has(> [data-tree-group='grp-sessions'],> [data-tree-group='grp-main'],> [data-tree-split] > div > :is([data-tree-group='grp-sessions'],[data-tree-group='grp-main']))){background:var(--cs-canvas)!important;}
-> div:has(> [data-tree-group][data-window-top]:not([data-tree-group='grp-sessions']):not([data-tree-group='grp-main']):not([data-claude-has~="tree-tab-workspace"])){-webkit-app-region:drag;}
+> div:has(> [data-tree-group][data-window-top]:not([data-tree-group='grp-sessions']):not([data-tree-group='grp-main']):not([data-claude-has~="tree-tab-workspace"]))::before{content:'';position:fixed;top:0;right:max(0px,calc(100vw - var(--cs-right-controls-start,100vw)));height:var(--cs-card-top);pointer-events:none;-webkit-app-region:drag;}
 > div > [role='separator']{-webkit-app-region:no-drag;}}}
 ${$T} [data-tree-split] > div[style*='display: none'] + div:has(> [data-tree-group='grp-terminal']),${$T}[data-claude-files-hidden='true'] [data-tree-split] > div[data-claude-has~="child-tree-split-div-tree-group-grp-files"]:not([data-claude-has~="child-tree-split-div-not-style-display-none-tree-gro"]) + div:has(> [data-tree-group='grp-terminal']){flex:1 1 0%!important;max-height:none!important;}
 ${$T}[data-claude-files-hidden='true'] [data-tree-split] > div[data-claude-has~="child-tree-split-div-tree-group-grp-files"]:not([data-claude-has~="child-tree-split-div-not-style-display-none-tree-gro"]) + div > [data-tree-group='grp-terminal']{margin-top:var(--cs-card-top)!important;}
@@ -2609,6 +2609,12 @@ if(!band)return[cluster,null,0]
 const scale=box.height / cluster.offsetHeight,before=Number.parseFloat(cluster.style.getPropertyValue('--cs-titlebar-offset'))||0
 return[cluster,Math.round((before+(band.top+band.height / 2-box.top-box.height / 2)/ scale)*100)/ 100,before]
 })
+const right=clusters.find(cluster=>cluster.dataset.titlebarCluster==='right')?.getBoundingClientRect()
+const start=right?.width>0?`${Math.floor(right.left)}px`:null
+if(document.documentElement.style.getPropertyValue('--cs-right-controls-start')!==(start??'')){
+if(start)document.documentElement.style.setProperty('--cs-right-controls-start',start)
+else document.documentElement.style.removeProperty('--cs-right-controls-start')
+}
 for(const[cluster,offset,before]of shifts){
 if(offset===null||Math.abs(offset)<0.02)unshift(cluster)
 else if(Math.abs(offset-before)>0.02||!shifted.has(cluster)){
@@ -2635,6 +2641,7 @@ window.cancelAnimationFrame(frame)
 sizes.disconnect();changes.disconnect()
 window.removeEventListener('resize',soon)
 shifted.forEach(unshift)
+document.documentElement.style.removeProperty('--cs-right-controls-start')
 }
 }
 const ROOT_SETTING_MARKS=['data-claude-composer-width','data-claude-pinned-user-messages','data-claude-clean-transcript','data-claude-ascii-glyphs','data-claude-ascii-scene']
@@ -6225,8 +6232,16 @@ const treeWidth=()=>clamp(sizes.tree||TREE_DEFAULT,TREE_MIN,cardWidth()-TREE_MIN
 const setVar=(name,value)=>{if(root.style.getPropertyValue(name)!==value)value?root.style.setProperty(name,value):root.style.removeProperty(name)}
 const applySizes=()=>{
 const card=cardWidth(),tree=clamp(sizes.tree||TREE_DEFAULT,TREE_MIN,card-TREE_MIN)
-const side=sizes.side?clamp(sizes.side,SIDE_MIN,sideMax()):0
-const preview=sizes.preview?clamp(sizes.preview,SIDE_MIN,previewMax()):0
+const now=layout(),detached=root.hasAttribute('data-claude-file-joined')||root.hasAttribute('data-claude-file-over')
+let side,preview
+if(!detached&&sizes.side&&sizes.preview&&shown(now.column)&&now.preview){
+const room=columnMax(null)
+side=clamp(sizes.side,SIDE_MIN,room-SIDE_MIN)
+preview=clamp(sizes.preview,SIDE_MIN,room-side)
+}else{
+side=sizes.side?clamp(sizes.side,SIDE_MIN,sideMax()):0
+preview=sizes.preview?clamp(sizes.preview,SIDE_MIN,previewMax()):0
+}
 setVar('--cs-rail-width',sizes.sidebar?sizes.sidebar+'px':'')
 setVar('--cs-files-card',card+'px')
 setVar('--cs-files-tree',tree+'px')

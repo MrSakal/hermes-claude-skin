@@ -1,5 +1,5 @@
 name: claude-chat-look
-version: "1.0.0-beta.1"
+version: "1.0.0-beta.2"
 description: >-
   A Claude-inspired look for Hermes Desktop, with refined chat, sidebar and
   browser styling, native theme support, and optional clean transcript and

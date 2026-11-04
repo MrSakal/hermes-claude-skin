@@ -21,3 +21,7 @@ Manual install: put [`claude-chat-look/plugin.js`](claude-chat-look/plugin.js) i
 - Works best with Hermes' **Technical** tool call display and the status bar switched on (the skin hides the bar itself and keeps its controls).
 - The plugin checks this repository's releases for updates; installing one always needs your click. See [SECURITY.md](SECURITY.md).
 - It styles internal Desktop elements, so a Hermes UI update can need a skin update.
+
+## License
+
+[MIT](LICENSE) © 2026 MrSakal
