@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+## [1.0.0-beta.3] - 2026-11-05
+
+Fixes.
+
+- In-app updates install again. The update check read the version from the downloaded file in a form the shipped build no longer has, so every update stopped with "Update didn't complete".
+- A build of 1.0.0-beta.1 or beta.2 cannot update itself to this one (it carries the old check): install this release by hand once, as in the README; later updates work from inside Hermes.
+
 ## [1.0.0-beta.2] - 2026-11-04
 
 Fixes.

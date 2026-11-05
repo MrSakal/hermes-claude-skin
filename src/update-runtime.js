@@ -94,7 +94,8 @@ async function sha256Hex(data) {
 
 // What a plugin source says it is: the value of its top-level `const NAME = '…'`.
 function declaredConstant(source, name) {
-  const line = new RegExp(`^const ${name} = '([^'\\n]+)'`, 'm').exec(source)
+  // The shipped build drops the spaces around `=`; the source keeps them.
+  const line = new RegExp(`^const ${name} ?= ?'([^'\\n]+)'`, 'm').exec(source)
   return line ? line[1] : null
 }
 

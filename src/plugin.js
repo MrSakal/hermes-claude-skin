@@ -2,7 +2,7 @@ import { host, PALETTE_AREA, THEMES_AREA } from '@hermes/plugin-sdk'
 
 const ID = 'claude-chat-look'
 const STYLE_ID = `${ID}-styles`
-const BUILD_ID = 'v1.0.0-beta.2'
+const BUILD_ID = 'v1.0.0-beta.3'
 const COMPOSER_WIDTH_STORAGE_KEY = 'composer-width'
 // The composer widths, in the order the palette steps through them (the last
 // one wraps round to the first).
@@ -20363,7 +20363,8 @@ async function sha256Hex(data) {
 
 // What a plugin source says it is: the value of its top-level `const NAME = '…'`.
 function declaredConstant(source, name) {
-  const line = new RegExp(`^const ${name} = '([^'\\n]+)'`, 'm').exec(source)
+  // The shipped build drops the spaces around `=`; the source keeps them.
+  const line = new RegExp(`^const ${name} ?= ?'([^'\\n]+)'`, 'm').exec(source)
   return line ? line[1] : null
 }
 

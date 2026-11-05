@@ -1,7 +1,7 @@
 import{host,PALETTE_AREA,THEMES_AREA}from '@hermes/plugin-sdk'
 const ID='claude-chat-look'
 const STYLE_ID=`${ID}-styles`
-const BUILD_ID='v1.0.0-beta.2'
+const BUILD_ID='v1.0.0-beta.3'
 const COMPOSER_WIDTH_STORAGE_KEY='composer-width'
 const COMPOSER_WIDTH_STEPS=[['claude','Claude'],['claude-wide','Claude +20 %'],['claude-wider','Claude +40 %'],['hermes','Hermes']]
 const COMPOSER_WIDTH_MODES=Object.fromEntries(COMPOSER_WIDTH_STEPS.map(([mode,label],step)=>
@@ -10816,7 +10816,7 @@ for(const byte of digest)hex+=byte.toString(16).padStart(2,'0')
 return hex
 }
 function declaredConstant(source,name){
-const line=new RegExp(`^const ${name} = '([^'\\n]+)'`,'m').exec(source)
+const line=new RegExp(`^const ${name} ?= ?'([^'\\n]+)'`,'m').exec(source)
 return line?line[1]:null
 }
 function updatePluginFolder(reported){
